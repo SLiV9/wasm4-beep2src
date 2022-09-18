@@ -144,14 +144,19 @@ for (let [channelOffset, channel] of data.channels.entries()) {
     continue;
   }
 
+  let sequence = [];
+  for (let b = 0; b < data.loopBars; b += 1) {
+    sequence.push(channel.sequence[data.introBars + b]);
+  }
+
   // Code to play this track
   result += `pub fn play_${identifier}`;
   if (data.channels.length > 1) {
     result += `_track_${track}`;
   }
   result += `(t: usize, volume: u32) {\n`;
-  if (channel.sequence.length > 0) {
-    result += `\tlet sequence = [${channel.sequence}];\n`;
+  if (sequence.length > 0) {
+    result += `\tlet sequence = [${sequence}];\n`;
     result += `\tmatch sequence[(t / ${patternDuration}) % sequence.len()] {\n`;
     for (let [p, n] of usedPatterns) {
       result += `\t\t${n} => play_${identifier}_track_${track}_pattern_${n}(t, volume),\n`;
