@@ -169,23 +169,25 @@ for (let [channelOffset, channel] of data.channels.entries()) {
     for (let note of p.notes) {
       let tStart = note.points[0].tick * tickDuration;
       let tEnd = note.points[1].tick * tickDuration;
-      let duration = tEnd - tStart;
-      result += `\t\t${tStart} => {\n`;
-      for (let pitch of note.pitches) {
+      let pitches = [...note.pitches];
+      pitches.sort();
+      for (let pitch of pitches) {
+        result += `\t\t${tStart} => {\n`;
         let pitchOffset = BeepBox.notes.indexOf(pitch);
         if (pitchOffset < 0) {
           pitchOffset = 18;
         }
         let freq = BeepBox.tones[pitchOffset];
-        let release = duration;
+        let release = tEnd - tStart;
         result += `\t\t\ttone(${freq}, ${release} << 8, volume`;
         let relativeVolume = note.points[0].volume * instrument.volume / 100;
         if (relativeVolume < 100) {
           result += ` * ${relativeVolume} / 100`;
         }
         result += `, ${instrumentFlags});\n`;
+        result += `\t\t}\n`;
+        tStart += 1;
       }
-      result += `\t\t}\n`;
     }
     result += `\t\t_ => (),\n`;
     result += `\t}\n`;
